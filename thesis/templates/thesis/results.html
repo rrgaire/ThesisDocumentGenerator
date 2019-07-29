@@ -1,0 +1,90 @@
+{% extends 'thesis/base.html' %}
+
+{% block script %}
+
+    <script>
+        $(document).ready(function () {
+
+            $("#submit").click(function (event) {
+                let filled = true;
+                $('input:text').each(function () {
+                    if ($(this).val().length === 0){
+                        filled = false;
+                        return false;
+                    }
+
+                })
+                if (filled === true){
+                    console.log('Ronast');
+                    alert('Successful...');
+                }
+            })
+        });
+
+    </script>
+
+{% endblock %}
+
+{% block body %}
+
+    <form class="form-horizontal" method='POST' , action="">
+        {% csrf_token %}
+        <fieldset>
+            <!-- Form Name -->
+            {#            Inputs#}
+            <div class="form-group">
+                <br>
+                <label class="col-md-4 control-label" for="giftID">Notice Date</label>
+                <div class="col-md-4">
+                    {{ form.CurrentDate }}
+                </div>
+            </div>
+            <h2><strong>Student List</strong></h2>
+            <div class="col-lg-11">
+                <table class="table table-striped table-bordered table-sm">
+                    <thead >
+                    <tr>
+                        {#                        <th id='column-header-1'>Column Header 1<div id='column-header-1-sizer'></div></th>#}
+                        <th scope="col">S.N.</th>
+                        <th scope="col">Name</th>
+                        <th scope="col">Roll Number</th>
+                        <th scope="col">Thesis Title</th>
+                        <th scope="col">Exam Roll Number</th>
+                        <th scope="col">Internal Marks</th>
+                        <th scope="col">Final Marks</th>
+                        <th scope="col"></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+
+                    {% for f in formset %}
+                        <tr>
+                            <th scope="row"> {{ forloop.counter }} </th>
+                            <td>{{ f.name }}</td>
+                            <td>{{ f.rollNumber }}</td>
+                            <td>{{ f.thesisTitle }}</td>
+                            <td>{{ f.examRollNumber }}</td>
+                            <td>{{ f.internalMarks }}</td>
+                            <td>{{ f.finalMarks }}</td>
+                            <td>{{ f.id }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+
+
+            </div>
+            {{ formset.management_form }}
+            <button id="submit" type="submit" name="submit" class="btn btn-primary btn-lg"
+                    style="position: fixed; bottom: 5px; margin: auto;">Submit
+            </button>
+            </div>
+        </fieldset>
+
+    </form>
+
+    </div>
+
+{% endblock %}
+
+

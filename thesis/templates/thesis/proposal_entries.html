@@ -1,0 +1,12 @@
+{% extends 'thesis/base.html' %}
+{% load static %}
+{% block head %}
+    <link rel="stylesheet" href="{% static 'thesis/proposal_entries.css' %}">
+{% endblock %}
+
+{% block body %}
+    <a href="{% url 'proposalNotice' %}" class="push_button blue">
+        Create Proposal Defense Notice
+    </a>
+
+{% endblock %}

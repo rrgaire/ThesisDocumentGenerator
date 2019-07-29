@@ -1,0 +1,74 @@
+{% extends 'thesis/base.html' %}
+
+{% load static %}
+
+
+
+{% block body %}
+
+    <form class="form-horizontal" method='POST' , action="">
+        {% csrf_token %}
+        <fieldset>
+            <!-- Form Name -->
+            {#            Inputs#}
+            <h2><strong>Student List</strong></h2>
+            <div class="col-lg-11">
+                <table style="margin-left: 5%" class="table table-striped table-bordered table-sm">
+                    <thead>
+                    <tr>
+                        {#                        <th id='column-header-1'>Column Header 1<div id='column-header-1-sizer'></div></th>#}
+                        <th style="width: 3%" scope="col" id='column-header-1'>S.N.</th>
+                        <th style="width: 12%"scope="col">Name</th>
+                        <th style="width: 11%"scope="col">Roll Number</th>
+                        <th scope="col" style="width: 8%">Exam Roll</th>
+                        <th style="width: 20%" scope="col">Thesis Title</th>
+                        <th scope="col">Supervisor</th>
+                        <th scope="col">Examiner</th>
+                        <th style="width: 3%"scope="col">Mid Term</th>
+                        <th style="width: 3%"scope="col">Final</th>
+                        <th scope="col">Internal Marks</th>
+                        <th scope="col">Final Marks</th>
+                        <th scope="col">Total Marks</th>
+                        <th scope="col">Delete  <span class="glyphicon glyphicon-trash"></span></th>
+                        <th style="width: 0%"scope="col"></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+
+                    {% for f in formset %}
+                        <tr>
+                            <th scope="row"> {{ forloop.counter }} </th>
+                            <td>{{ f.name }}</td>
+                            <td>{{ f.rollNumber }}</td>
+                            <td>{{ f.examRollNumber }}</td>
+                            <td>{{ f.thesisTitle }}</td>
+                            <td>{{ f.supervisor }}</td>
+                            <td>{{ f.examiner }}</td>
+                            <td>{{ f.midterm }}</td>
+                            <td>{{ f.final }}</td>
+                            <td>{{ f.internalMarks }}</td>
+                            <td>{{ f.finalMarks }}</td>
+                            <td>{{ f.totalMarks }}</td>
+                            <td>{{ f.remove }} </td>
+                            <td>{{ f.id }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+
+
+            </div>
+            {{ formset.management_form }}
+            <button id="submit" type="submit" name="submit" class="btn btn-primary btn-lg"
+                    style="position: fixed; bottom: 5px; margin: auto;">Submit
+            </button>
+            </div>
+        </fieldset>
+
+    </form>
+
+    </div>
+
+{% endblock %}
+
+

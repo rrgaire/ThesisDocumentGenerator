@@ -1,0 +1,62 @@
+{% extends 'thesis/base.html' %}
+
+{% load static %}
+
+{% block script %}
+
+    <script src="{% static 'js/notice.js' %}"></script>
+
+{% endblock %}
+
+{% block body %}
+    <br>
+    <br>
+    <br>
+
+    <form class="form-horizontal" , method='POST' , action="">
+        {% csrf_token %}
+        <fieldset>
+            <!-- Form Name -->
+            <h2 style="margin-left:-300px;"> Add Notice Information</h2><br>
+            <!-- Text input-->
+            <div class="form-group">
+                <label class="col-md-4 control-label" for="giftID">Notice Date</label>
+                <div class="col-md-4">
+                    {{ form.CurrentDate }}
+                </div>
+            </div>
+            <!-- Text input-->
+            <div class="form-group">
+                <label class="col-md-4 control-label" for="giftName">Defence Date</label>
+                <div class="col-md-4">
+                    {{ form.defenseDate }}
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-md-4 control-label" for="giftName">Student Batch</label>
+                <div class="col-md-4">
+                    {{ form.studentBatch }}
+                </div>
+            </div>
+
+            <!-- Select Basic -->
+            <div class="form-group">
+                <label class="col-md-4 control-label" for="giftName">Presentation Time</label>
+                <div class="col-md-4">
+                    {{ form.PresentationTime }}
+                </div>
+            </div>
+
+            <!-- Text input-->
+            <div class="form-group">
+                <label class="col-md-4 control-label" for="giftID">Defence Time</label>
+                <div class="col-md-4">
+                    {{ form.defenseTime }}
+                </div>
+            </div>
+            <br>
+            <button id="submit" style="margin-left:400px;" class="btn btn-primary btn-lg">Submit</button>
+        </fieldset>
+    </form>
+
+{% endblock %}

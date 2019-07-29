@@ -1,0 +1,42 @@
+{% extends 'thesis/base.html' %}
+
+{% block body %}
+    <br>
+
+    <form class="form-horizontal" , method='POST' , action="">
+        {% csrf_token %}
+        <fieldset>
+            <!-- Form Name -->
+            <h2 style="margin-left:-300px;"> Add Committee Members</h2><br>
+            <!-- Text input-->
+            <div class="form-group">
+                <label class="col-md-4 control-label" for="giftID">Notice Date</label>
+                <div class="col-md-4">
+                    {{ form.CurrentDate }}
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="col-md-4 control-label" for="giftID">Chairman</label>
+                <div class="col-md-4">
+                    {{ form.Chairman }}
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-md-4 control-label" for="giftID">Member</label>
+                <div class="col-md-4">
+                    {{ form.Member }}
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-md-4 control-label" for="giftID">Member Secretary</label>
+                <div class="col-md-4">
+                    {{ form.MemberSecretary }}
+                </div>
+            </div>
+            <br>
+            <button id = "submit" style="margin-left:400px;" class="btn btn-primary btn-lg">Submit</button>
+        </fieldset>
+    </form>
+
+{% endblock %}

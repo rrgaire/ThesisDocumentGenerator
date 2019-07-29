@@ -1,0 +1,54 @@
+{% extends 'thesis/base.html' %}
+
+{#{% block script %}#}
+{##}
+{#    <script src="{% static 'js/students.js' %}"></script>#}
+{#{% endblock %}#}
+
+{% block body %}
+
+    <form class="form-horizontal" method='POST' , action="">
+        {% csrf_token %}
+        <fieldset>
+            <!-- Form Name -->
+            {#            Inputs#}
+            <h2><strong>Program</strong></h2>
+            <div class="col-lg-11">
+                <table class="table table-striped table-bordered table-sm responsetable">
+                    <thead>
+                    <tr>
+                        {#                        <th id='column-header-1'>Column Header 1<div id='column-header-1-sizer'></div></th>#}
+                        <th scope="col">Coordinator </th>
+                        <th scope="col">Program</th>
+                        <th scope="col"></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+
+                    {% for f in formset %}
+                        <tr>
+                            <td>{{ f.coordinatorName }}</td>
+                            <td>{{ f.programName }}</td>
+                            <td>{{ f.id }}</td>
+
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+
+
+            </div>
+            {{ formset.management_form }}
+            <button id="submit" type="submit" name="submit" class="btn btn-primary btn-lg "
+                    style="position: fixed; bottom: 5px; margin: auto;">Submit
+            </button>
+            </div>
+        </fieldset>
+
+    </form>
+
+    </div>
+
+{% endblock %}
+
+

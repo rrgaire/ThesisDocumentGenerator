@@ -1,0 +1,15 @@
+{% extends 'thesis/base.html' %}
+{% load static %}
+{% block head %}
+    <link rel="stylesheet" href="{% static 'thesis/proposal_entries.css' %}">
+{% endblock %}
+
+{% block body %}
+    <a href="{% url 'midTermNotice' %}" class="push_button blue">
+        Create Mid-Term Thesis Defense Notice
+    </a>
+
+    <a href="{% url 'mid_term_thesis_defense_list' %}" class="push_button blue">
+        Prepare Midterm Thesis Defense List
+    </a>
+{% endblock %}
