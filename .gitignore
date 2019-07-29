@@ -1,0 +1,11 @@
+**/.idea/*
+**/__pycache__/*
+venv/
+node_modules
+Templates
+db.sqlite3
+**/migrations/*
+db.sqlite3
+package-lock.json
+pip-selfcheck.json
+pyvenv.cfg

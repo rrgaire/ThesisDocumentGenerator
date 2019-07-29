@@ -1,0 +1,8 @@
+iframe {
+    border: 1px solid blue;
+    width: 100%;
+}
+
+.output {
+    background: #eee;
+}
