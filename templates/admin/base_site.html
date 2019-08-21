@@ -1,0 +1,39 @@
+{% extends "admin/base.html" %}
+{% load i18n static %}
+
+{% load static %}
+
+{% block extrahead %}
+    <a href="/"> <img src="{% static 'admin/img/campuslogo.jpg' %}"></a>
+{% endblock %}
+
+{% block title %}{{ title }} | {{ site_title|default:_('MSC Thesis Document Generation') }}
+{% endblock %}
+
+{% block branding %}
+    <h1 id="site-name">
+        <a href="{% url 'admin:index' %}">{{ site_header|default:_('MSc Teachers & Experts Database') }}</a>
+        <a href="{% url 'thesis:index' %}"><strong style="color: #0f0f0f">|| </strong>{{ site_header1|default:_('MSc Thesis Document Generation') }}</a></h1>
+{% endblock %}
+
+
+
+
+
+
+{% block footer %}
+    <br><br>
+    <div style="
+    text-align: center;
+    color: white;
+    background: #79aec8;
+    padding: 10px 10px 10px 10px;
+    bottom: 2px;
+    position: fixed;
+
+    width: 100%;
+">
+        System by 072 BCT and 073 BCT | <a href="{% url "aboutsystem" %}">About / Contact Developers</a>
+    </div>
+
+{% endblock %}

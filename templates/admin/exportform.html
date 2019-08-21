@@ -1,0 +1,30 @@
+{% extends "admin/index.html" %}
+{% load i18n static %}
+{% load static %}
+
+{% block title %}Export | {{ site_title|default:_('MSc Teachers & Experts Database') }}{% endblock %}
+
+
+
+<caption>
+    <a href="{{ app.app_url }}" class="section"
+       title="{% blocktrans with name=app.name %}Models in the {{ name }} application{% endblocktrans %}">{{ app.name }}</a>
+</caption>
+
+
+
+{% block content %}
+    <h1> Export to Excel </h1>
+    <h2>Teacher Subject List</h2>
+    <form method="POST" class="post-form">{% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="save btn btn-default">Export</button>
+        <a href="{% url 'dumpteachers' %}"> <h2> Export Teachers List </h2> </a>
+        <a href="{% url 'dumpexperts' %}"><h2> Export Experts List </h2> </a>
+
+    </form>
+
+{% endblock %}
+
+
+{% block sidebar %}{% endblock %}
