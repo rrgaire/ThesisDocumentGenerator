@@ -1,16 +1,13 @@
-from django.contrib.admin.helpers import AdminForm
-from django.core import serializers
-from mailmerge import MailMerge
+
 import pandas as pd
-import openpyxl
+
 from django.shortcuts import render, redirect
-from django.http import HttpResponse, JsonResponse
-from SE import utils
+
+from . import utils
 import os
-from thesis.models import Supervisor, Examiner, Student, CommonFields, Admin, Budget
-from .forms import NoticeForm, StudentForm, SupervisorForm, ExaminerForm, \
-    MidTermThesisCommittee, StudentFormset, NoticeFormExtra, CurrentDate, ResultFormset, AdministratorForm, \
-    BudgetFormset
+from thesis.models import Student, CommonFields, Budget, Coordinator
+from .forms import NoticeForm, MidTermThesisCommittee, StudentFormset, \
+    NoticeFormExtra, CurrentDate, ResultFormset
 from django.views.generic import TemplateView
 
 
@@ -23,31 +20,6 @@ def index(request):
 
 def invalid(request):
     return render(request, 'thesis/invalid.html')
-
-
-def budget(request):
-    if request.method == 'POST':
-        formset = BudgetFormset(request.POST)
-        print(formset.errors)
-        if formset.is_valid():
-            formset.save()
-
-        return redirect('budget')
-    else:
-        formset = BudgetFormset(queryset=Budget.objects.all())
-        return render(request, 'thesis/budget.html', {'formset': formset})
-
-
-def admin(request):
-    if request.method == 'POST':
-        formset = AdministratorForm(request.POST)
-        print(formset.errors)
-        if formset.is_valid():
-            formset.save()
-        return redirect('index')
-    else:
-        formset = AdministratorForm(queryset=Admin.objects.all())
-        return render(request, 'thesis/admin_setting.html', {'formset': formset})
 
 
 def proposal_entries(request):
@@ -85,50 +57,13 @@ def students(request):
                     else:
                         i.totalMarks = None
 
-                if i.remove is True:
-                    i.delete()
-                else:
-                    i.save()
-        return redirect('students')
+
+                i.save()
+        return redirect('thesis:students')
     else:
         formset = StudentFormset(queryset=Student.objects.all())
         return render(request, 'thesis/students.html', {'formset': formset})
 
-
-def supervisor(request):
-    if request.method == 'POST':
-        formset = SupervisorForm(request.POST)
-        print(formset.errors)
-        if formset.is_valid():
-            instances = formset.save(commit=False)
-            for i in instances:
-                if i.remove is True:
-                    i.delete()
-                else:
-                    i.save()
-        return redirect('supervisor')
-    else:
-        formset = SupervisorForm(queryset=Supervisor.objects.all())
-        return render(request, 'thesis/supervisor.html', {'formset': formset})
-
-
-def examiner(request):
-    if request.method == 'POST':
-        formset = ExaminerForm(request.POST)
-        print(formset.errors)
-        if formset.is_valid():
-            instances = formset.save(commit=False)
-            for i in instances:
-                if i.remove is True:
-                    i.delete()
-                else:
-                    i.save()
-            return redirect('examiner')
-        else:
-            return redirect('invalid')
-    else:
-        formset = ExaminerForm(queryset=Examiner.objects.all())
-        return render(request, 'thesis/examiner.html', {'formset': formset})
 
 
 def proposalNotice(request):
@@ -136,7 +71,7 @@ def proposalNotice(request):
         form = NoticeForm(request.POST)
         formExtra = NoticeFormExtra(request.POST)
         if form.is_valid() and formExtra.is_valid():
-            admins = Admin.objects.all().get()
+            admins = Coordinator.objects.all().get()
             form.save()
             Common = CommonFields.objects.all()
             if len(Common) > 1:
@@ -145,8 +80,8 @@ def proposalNotice(request):
             contextFormExtra = formExtra.cleaned_data
             defenseDate = str(Common[0].defenseDate)
             studentBatch = str(Common[0].studentBatch)
-            context['programName'] = admins.programName
-            context['coordinatorName'] = admins.coordinatorName
+            context['programName'] = str(admins.programName)
+            context['coordinatorName'] = str(admins.coordinatorName)
             context['batch'] = studentBatch
             context['defensedate'] = defenseDate
             context['submissionTime'] = contextFormExtra['submissionTime']
@@ -157,9 +92,9 @@ def proposalNotice(request):
             utils.render_to_word(src_add, os.path.join(
                 os.path.join(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'Documents'), 'Proposal'),
                 'ProposalNotice.docx'), context)
-            return redirect('index')
+            return redirect('thesis:index')
         else:
-            return redirect('invalid')
+            return redirect('thesis:invalid')
 
     else:
         form = NoticeForm()
@@ -172,21 +107,21 @@ def midTermNotice(request):
         form = NoticeForm(request.POST)
         print(form.errors)
         if form.is_valid():
-            admins = Admin.objects.all().get()
+            admins = Coordinator.objects.all().get()
             form.save()
             Common = CommonFields.objects.all()
             if len(Common) > 1:
                 Common[0].delete()
             context = form.cleaned_data
-            context['programName'] = admins.programName
-            context['coordinatorName'] = admins.coordinatorName
+            context['programName'] = str(admins.programName)
+            context['coordinatorName'] = str(admins.coordinatorName)
             src_add = os.path.join(
                 os.path.join(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'Templates'), 'Midterm'),
                 'MidtermNotice.docx')
             utils.render_to_word(src_add, os.path.join(
                 os.path.join(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'Documents'), 'Midterm'),
                 'midtermNotice.docx'), context)
-            return redirect('index')
+            return redirect('thesis:index')
 
     else:
         form = NoticeForm()
@@ -199,7 +134,7 @@ def finalNotice(request):
         form = NoticeForm(request.POST)
         formExtra = NoticeFormExtra(request.POST)
         if form.is_valid() and formExtra.is_valid():
-            admins = Admin.objects.all().get()
+            admins = Coordinator.objects.all().get()
             form.save()
             Common = CommonFields.objects.all()
             if len(Common) > 1:
@@ -208,15 +143,16 @@ def finalNotice(request):
             contextFormExtra = formExtra.cleaned_data
             context['submissionTime'] = contextFormExtra['submissionTime']
             context['submissionDate'] = contextFormExtra['submissionDate']
-            context['programName'] = admins.programName
-            context['coordinatorName'] = admins.coordinatorName
+            context['programName'] = str(admins.programName)
+            context['coordinatorName'] = str(admins.coordinatorName)
+            print (context)
             src_add = os.path.join(
                 os.path.join(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'Templates'), 'Final'),
                 'FinalNotice.docx')
             utils.render_to_word(src_add, os.path.join(
                 os.path.join(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'Documents'), 'Final'),
                 'finalNotice.docx'), context)
-            return redirect('index')
+            return redirect('thesis:index')
 
     else:
         form = NoticeForm()
@@ -227,7 +163,7 @@ def finalNotice(request):
 def midtermthesislist(request):
     if request.method == 'POST':
         budgets = Budget.objects.all().get()
-        admins = Admin.objects.all().get()
+        admins = Coordinator.objects.all().get()
         Common = CommonFields.objects.all()
         defenseDate = str(Common[0].defenseDate)
         studentBatch = str(Common[0].studentBatch)
@@ -235,6 +171,7 @@ def midtermthesislist(request):
         formset = StudentFormset(request.POST)
         if formset.is_valid() and form.is_valid():
             context1 = form.cleaned_data
+            print(context1['Chairman'])
             budgetList = list()  # new
             students = []
             examiners = set()
@@ -284,9 +221,9 @@ def midtermthesislist(request):
                 sd['supervisor'] = str(std.supervisor)
                 sd['examiner'] = str(std.examiner)
                 evaluation.update(sd)
-                evaluation['programName'] = admins.programName
+                evaluation['programName'] = str(admins.programName)
                 evaluation['date'] = defenseDate
-                evaluation['organization'] = str(std.examiner.companyName)
+                evaluation['organization'] = str(std.examiner.organization.institute_name)
                 thesisStdList.append(sd)
 
                 sd1.append(std.rollNumber)
@@ -295,10 +232,11 @@ def midtermthesislist(request):
                 sd1.append(std.supervisor)
                 sd1.append(std.examiner)
 
+
                 thesisStdList1.append(sd1)
 
-                j = j + 1
 
+                j = j + 1
 
                 src_add = os.path.join(
                     os.path.join(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'Templates'), 'Midterm'),
@@ -324,8 +262,6 @@ def midtermthesislist(request):
                     , 'Evaluation'), 'Supervisor'),
                     (str(std.supervisor) + ' Supervisor_Evaluation.docx')), evaluation)
 
-
-
             df1 = pd.DataFrame(thesisStdList1,
                                columns=['Roll NO', 'Name Of Student', 'Thesis Title', 'Supervisor',
                                         ' External Examiner'])
@@ -335,8 +271,8 @@ def midtermthesislist(request):
                 'candidates-midterm.xlsx'))
 
             thesisListElements['list'] = thesisStdList
-            thesisListElements['programName'] = admins.programName
-            thesisListElements['coordinatorName'] = admins.coordinatorName
+            thesisListElements['programName'] = str(admins.programName)
+            thesisListElements['coordinatorName'] = str(admins.coordinatorName)
             thesisListElements['B2'] = studentBatch
 
             src_add = os.path.join(
@@ -350,10 +286,10 @@ def midtermthesislist(request):
                 budgetSupervisor = dict()  # new
                 i = 0
                 for std in students:
-                    if str(std.supervisor) == str(suv.name):
+                    if str(std.supervisor) == str(suv):
                         i = i + 1
 
-                budgetSupervisor['name'] = str(suv.name)
+                budgetSupervisor['name'] = str(suv)
                 budgetSupervisor['post'] = 'Supervisor'
                 budgetSupervisor['number'] = str(i)
                 budgetSupervisor['rate'] = str(budgets.supervisor)
@@ -363,13 +299,13 @@ def midtermthesislist(request):
 
                 budgetList.append(budgetSupervisor)
 
-            committeeMembers = [str(context1['MemberSecretary'].name), str(context1['Member'].name),
-                                str(context1['Chairman'].name)]
+            committeeMembers = [str(context1['MemberSecretary']), str(context1['Member']),
+                                str(context1['Chairman'])]
 
             supervisor1 = []
 
             for i in supervisor:
-                supervisor1.append(i.name)
+                supervisor1.append(i)
 
             k = 0
             for name in committeeMembers:
@@ -399,7 +335,7 @@ def midtermthesislist(request):
                 stdlist = list()
                 i = 0
                 for std in students:
-                    if str(std.examiner) == str(examr.name):
+                    if str(std.examiner) == str(examr):
                         s = dict()
                         s['name'] = str(std.name)
                         s['rollNumber'] = str(std.rollNumber)
@@ -408,7 +344,7 @@ def midtermthesislist(request):
                         i = i + 1
                         s['id'] = str(i)
 
-                budgetExaminer['name'] = str(examr.name)
+                budgetExaminer['name'] = str(examr)
                 budgetExaminer['post'] = 'External Examiner'
                 budgetExaminer['number'] = str(i)
                 budgetExaminer['rate'] = str(budgets.externalExaminer)
@@ -417,11 +353,11 @@ def midtermthesislist(request):
                 budgetExaminer['net'] = str(float(budgetExaminer['total']) - float(budgetExaminer['tax']))
 
                 budgetList.append(budgetExaminer)
-                context['programName'] = admins.programName
-                context['coordinatorName'] = admins.coordinatorName
-                context['ExExaminerName'] = str(examr.name)
-                context['CompanyName'] = str(examr.companyName)
-                context['ComAddress'] = str(examr.companyAddress)
+                context['programName'] = str(admins.programName)
+                context['coordinatorName'] = str(admins.coordinatorName)
+                context['ExExaminerName'] = str(examr)
+                context['CompanyName'] = str(examr.organization.institute_name)
+                context['ComAddress'] = str(examr.organization.address)
                 context['CurrentDate'] = context1['CurrentDate']
                 context['DefenceDate'] = defenseDate
                 context['no'] = numberOfStudents
@@ -434,7 +370,7 @@ def midtermthesislist(request):
                         'LetterToExExaminer.docx')
                     utils.make_table(src_add, os.path.join(
                         os.path.join(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'Documents'), 'Midterm'),
-                        (str(examr.name) + ' LetterToExExaminer.docx')), context)
+                        (str(examr) + ' LetterToExExaminer.docx')), context)
 
             context2 = dict()
             context2['CurrentDate'] = context1['CurrentDate']
@@ -446,8 +382,8 @@ def midtermthesislist(request):
                 budgetList[i]['sn'] = str(i + 1)
 
             context2['list'] = budgetList
-            context2['programName'] = admins.programName
-            context2['coordinatorName'] = admins.coordinatorName
+            context2['programName'] = str(admins.programName)
+            context2['coordinatorName'] = str(admins.coordinatorName)
             context2['taxPercent'] = str(budgets.tax)
             context2['batch'] = studentBatch
 
@@ -458,12 +394,13 @@ def midtermthesislist(request):
                 os.path.join(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'Documents'), 'Midterm'),
                 'midTermSalaryDistribution.docx'), context2)
 
-            context1['programName'] = admins.programName
-            context1['coordinatorName'] = admins.coordinatorName
+            context1['programName'] = str(admins.programName)
+            context1['coordinatorName'] = str(admins.coordinatorName)
             context1['DefenceDate'] = defenseDate
-            context1['Chairman'] = context1['Chairman'].name
-            context1['Member'] = context1['Member'].name
-            context1['MemberSecretary'] = context1['MemberSecretary'].name
+            context1['Chairman'] = str(context1['Chairman'])
+
+            context1['Member'] = str(context1['Member'])
+            context1['MemberSecretary'] = str(context1['MemberSecretary'])
             context1['Batch'] = studentBatch
             context1['no'] = numberOfStudents
 
@@ -474,7 +411,7 @@ def midtermthesislist(request):
                 os.path.join(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'Documents'), 'Midterm'),
                 'MidtermCommittee.docx'), context1)
 
-            return redirect('index')
+            return redirect('thesis:index')
 
     else:
         form = MidTermThesisCommittee()
@@ -487,7 +424,7 @@ def midtermthesislist(request):
 def finalthesislist(request):
     if request.method == 'POST':
         budgets = Budget.objects.all().get()
-        admins = Admin.objects.all().get()
+        admins = Coordinator.objects.all().get()
         Common = CommonFields.objects.all()
         defenseDate = str(Common[0].defenseDate)
         studentBatch = str(Common[0].studentBatch)
@@ -546,9 +483,9 @@ def finalthesislist(request):
                 sd['examiner'] = str(std.examiner)
 
                 evaluation.update(sd)
-                evaluation['programName'] = admins.programName
+                evaluation['programName'] = str(admins.programName)
                 evaluation['date'] = defenseDate
-                evaluation['organization'] = str(std.examiner.companyName)
+                evaluation['organization'] = str(std.examiner.organization.institute_name)
 
                 thesisStdList.append(sd)
 
@@ -596,8 +533,9 @@ def finalthesislist(request):
 
             thesisListElements['list'] = thesisStdList
             thesisListElements['defenseDate'] = defenseDate
-            thesisListElements['programName'] = admins.programName
-            thesisListElements['coordinatorName'] = admins.coordinatorName
+            thesisListElements['programName'] = str(admins.programName)
+            
+            thesisListElements['coordinatorName'] = str(admins.coordinatorName)
 
             src_add = os.path.join(
                 os.path.join(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'Templates'), 'Final'),
@@ -610,10 +548,10 @@ def finalthesislist(request):
                 budgetSupervisor = dict()  # new
                 i = 0
                 for std in students:
-                    if str(std.supervisor) == str(suv.name):
+                    if str(std.supervisor) == str(suv):
                         i = i + 1
 
-                budgetSupervisor['name'] = str(suv.name)
+                budgetSupervisor['name'] = str(suv)
                 budgetSupervisor['post'] = 'Supervisor'
                 budgetSupervisor['number'] = str(i)
                 budgetSupervisor['rate'] = str(budgets.supervisor)
@@ -623,13 +561,13 @@ def finalthesislist(request):
 
                 budgetList.append(budgetSupervisor)
 
-            committeeMembers = [str(context1['MemberSecretary'].name), str(context1['Member'].name),
-                                str(context1['Chairman'].name)]
+            committeeMembers = [str(context1['MemberSecretary']), str(context1['Member']),
+                                str(context1['Chairman'])]
 
             supervisor1 = []
 
             for i in supervisor:
-                supervisor1.append(i.name)
+                supervisor1.append(i)
 
             k = 0
             for name in committeeMembers:
@@ -659,7 +597,7 @@ def finalthesislist(request):
                 stdlist = list()
                 i = 0
                 for std in students:
-                    if str(std.examiner) == str(examr.name):
+                    if str(std.examiner) == str(examr):
                         s = dict()
                         s['name'] = str(std.name)
                         s['rollNumber'] = str(std.rollNumber)
@@ -668,7 +606,7 @@ def finalthesislist(request):
                         i = i + 1
                         s['id'] = str(i)
 
-                budgetExaminer['name'] = str(examr.name)
+                budgetExaminer['name'] = str(examr)
                 budgetExaminer['post'] = 'External Examiner'
                 budgetExaminer['number'] = str(i)
                 budgetExaminer['rate'] = str(budgets.externalExaminer)
@@ -678,11 +616,11 @@ def finalthesislist(request):
 
                 budgetList.append(budgetExaminer)
 
-                context['programName'] = admins.programName
-                context['coordinatorName'] = admins.coordinatorName
-                context['ExExaminerName'] = str(examr.name)
-                context['CompanyName'] = str(examr.companyName)
-                context['ComAddress'] = str(examr.companyAddress)
+                context['programName'] =str(admins.programName)
+                context['coordinatorName'] = str(admins.coordinatorName)
+                context['ExExaminerName'] = str(examr)
+                context['CompanyName'] = str(examr.organization.institute_name)
+                context['ComAddress'] = str(examr.organization.address)
                 context['CurrentDate'] = context1['CurrentDate']
                 context['DefenceDate'] = defenseDate
                 context['B2'] = studentBatch
@@ -695,7 +633,7 @@ def finalthesislist(request):
                         'LetterToExExaminer.docx')
                     utils.make_table(src_add, os.path.join(
                         os.path.join(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'Documents'), 'Final'),
-                        (str(examr.name) + ' LetterToExExaminer.docx')), context)
+                        (str(examr) + ' LetterToExExaminer.docx')), context)
 
             context2 = dict()
             context2['CurrentDate'] = context1['CurrentDate']
@@ -707,8 +645,8 @@ def finalthesislist(request):
                 budgetList[i]['sn'] = str(i + 1)
 
             context2['list'] = budgetList
-            context2['programName'] = admins.programName
-            context2['coordinatorName'] = admins.coordinatorName
+            context2['programName'] = str(admins.programName)
+            context2['coordinatorName'] = str(admins.coordinatorName)
             context2['taxPercent'] = str(budgets.tax)
             context2['batch'] = studentBatch
 
@@ -719,12 +657,12 @@ def finalthesislist(request):
                 os.path.join(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'Documents'), 'Final'),
                 'finalSalaryDistribution.docx'), context2)
 
-            context1['programName'] = admins.programName
-            context1['coordinatorName'] = admins.coordinatorName
+            context1['programName'] = str(admins.programName)
+            context1['coordinatorName'] = str(admins.coordinatorName)
             context1['defenseDate'] = defenseDate
-            context1['Chairman'] = context1['Chairman'].name
-            context1['Member'] = context1['Member'].name
-            context1['MemberSecretary'] = context1['MemberSecretary'].name
+            context1['Chairman'] = str(context1['Chairman'])
+            context1['Member'] = str(context1['Member'])
+            context1['MemberSecretary'] = str(context1['MemberSecretary'])
             context1['Batch'] = studentBatch
             context1['no'] = numberOfStudents
 
@@ -734,7 +672,7 @@ def finalthesislist(request):
             utils.render_to_word(src_add, os.path.join(
                 os.path.join(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'Documents'), 'Final'),
                 'FinalCommittee.docx'), context1)
-            return redirect('index')
+            return redirect('thesis:index')
 
     else:
         form = MidTermThesisCommittee()
@@ -752,7 +690,7 @@ def results(request):
         Common = CommonFields.objects.all()
         defenseDate = str(Common[0].defenseDate)
         studentBatch = str(Common[0].studentBatch)
-        admins = Admin.objects.all().get()
+        admins = Coordinator.objects.all().get()
         print(formset.errors)
         if formset.is_valid() and form.is_valid():
             context1 = form.cleaned_data
@@ -790,8 +728,8 @@ def results(request):
                 thesisStdList.append(sd)
                 j = j + 1
 
-            thesisListElements['programName'] = admins.programName
-            thesisListElements['coordinatorName'] = admins.coordinatorName
+            thesisListElements['programName'] = str(admins.programName)
+            thesisListElements['coordinatorName'] = str(admins.coordinatorName)
             thesisListElements['list'] = thesisStdList
 
             src_add = os.path.join(
@@ -808,7 +746,7 @@ def results(request):
                 os.path.join(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'Documents'), 'Final'),
                 'FinalThesisResult.docx'), thesisListElements)
 
-            return redirect('index')
+            return redirect('thesis:index')
     else:
         form = CurrentDate()
         formset = ResultFormset(

@@ -1,41 +1,29 @@
 from django.db import models
 
 
-# Create your models here.
-class Supervisor(models.Model):
-    name = models.CharField(max_length=30)
-    remove = models.BooleanField(default=False)
 
-    def __str__(self):
-        return f'{self.name}'
+from college.models import Teacher, Expert, Programme
 
-
-class Examiner(models.Model):
-    name = models.CharField(max_length=50)
-    companyName = models.CharField(max_length=100)
-    companyAddress = models.CharField(max_length=100)
-    remove = models.BooleanField(default=False)
-
-    def __str__(self):
-        return f'{self.name}'
 
 
 class Student(models.Model):
     name = models.CharField(max_length=30)
     rollNumber = models.CharField(max_length=30)
     thesisTitle = models.CharField(max_length=500, null=True, blank=True)
-    supervisor = models.ForeignKey(Supervisor, on_delete=models.SET_NULL, blank=True, null=True)
-    examiner = models.ForeignKey(Examiner, on_delete=models.SET_NULL, blank=True, null=True)
+    supervisor = models.ForeignKey(Teacher, on_delete=models.SET_NULL, blank=True, null=True)
+    examiner = models.ForeignKey(Expert, on_delete=models.SET_NULL, blank=True, null=True)
     midterm = models.BooleanField(default=False, blank=True)
     final = models.BooleanField(default=False, blank=True)
-    remove = models.BooleanField(default=False)
     internalMarks = models.IntegerField(blank=True, null=True)
     finalMarks = models.IntegerField(blank=True, null=True)
     totalMarks = models.IntegerField(blank=True, null=True)
     examRollNumber = models.CharField(max_length=30, blank=True, null=True)
 
+    def nameroll(self):
+        return self.rollNumber + " : " + self.name
+
     def __str__(self):
-        return f'{self.name}'
+        return f'{self.nameroll()}'
 
 
 class CommonFields(models.Model):
@@ -46,12 +34,19 @@ class CommonFields(models.Model):
         return f'{self.defenseDate}'
 
 
-class Admin(models.Model):
-    coordinatorName = models.CharField(max_length=100)
-    programName = models.CharField(max_length=1000)
+class Coordinator(models.Model):
+    coordinatorName = models.ForeignKey(Teacher, on_delete=models.SET_NULL, blank=True, null=True)
+    programName = models.ForeignKey(Programme, on_delete=models.SET_NULL, blank=True, null=True)
 
     def __str__(self):
-        return f'{self.coordinatorName}'
+        return f'{str(self.coordinatorName)}'
+
+    def save(self, *args, **kwargs):
+        if self.__class__.objects.count():
+            self.pk = self.__class__.objects.first().pk
+        super().save(*args, **kwargs)
+
+
 
 
 class Budget(models.Model):
@@ -60,3 +55,8 @@ class Budget(models.Model):
     staff = models.FloatField(blank=False, null=False)
     peon = models.FloatField(blank=False, null=False)
     tax = models.FloatField(blank=False, null=False)
+
+    def save(self, *args, **kwargs):
+        if self.__class__.objects.count():
+            self.pk = self.__class__.objects.first().pk
+        super().save(*args, **kwargs)

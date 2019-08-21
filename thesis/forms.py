@@ -1,6 +1,8 @@
 from django import forms
 from django.forms import modelformset_factory
-from .models import Student, Supervisor, Examiner, CommonFields, Admin, Budget
+
+from college.models import Teacher
+from .models import Student, CommonFields
 
 
 class StudentForm(forms.ModelForm):
@@ -22,7 +24,7 @@ class StudentForm(forms.ModelForm):
 
 StudentFormset = modelformset_factory(
     Student,
-    fields=['name', 'rollNumber', 'thesisTitle', 'supervisor', 'examiner', 'midterm', 'final', 'remove',
+    fields=['name', 'rollNumber', 'thesisTitle', 'supervisor', 'examiner', 'midterm', 'final',
             'internalMarks', 'finalMarks', 'totalMarks', 'examRollNumber'],
     extra=1,
     # form=FormsetStudentForm,
@@ -45,63 +47,63 @@ StudentFormset = modelformset_factory(
             attrs={'class': 'form-control input-md', 'placeholder': 'total', 'readonly': 'readonly'}),
 
     })
+#
+# ExaminerForm = modelformset_factory(
+#     Examiner,
+#     fields=['name', 'companyName', 'companyAddress', 'remove'],
+#     extra=1,
+#     # form=FormsetStudentForm,
+#     widgets={
+#         'name': forms.TextInput(
+#             attrs={'class': 'form-control input-md', 'placeholder': 'Name'}),
+#         'companyName': forms.TextInput(
+#             attrs={'class': 'form-control input-md', 'placeholder': 'Company Name'}),
+#         'companyAddress': forms.TextInput(
+#             attrs={'class': 'form-control input-md', 'placeholder': 'Address'}),
+#     })
 
-ExaminerForm = modelformset_factory(
-    Examiner,
-    fields=['name', 'companyName', 'companyAddress', 'remove'],
-    extra=1,
-    # form=FormsetStudentForm,
-    widgets={
-        'name': forms.TextInput(
-            attrs={'class': 'form-control input-md', 'placeholder': 'Name'}),
-        'companyName': forms.TextInput(
-            attrs={'class': 'form-control input-md', 'placeholder': 'Company Name'}),
-        'companyAddress': forms.TextInput(
-            attrs={'class': 'form-control input-md', 'placeholder': 'Address'}),
-    })
+# AdministratorForm = modelformset_factory(
+#
+#     Admin,
+#     fields=['coordinatorName', 'programName'],
+#     extra=1,
+#     min_num=1,
+#     max_num=1,
+#     widgets={
+#         'coordinatorName': forms.TextInput(
+#             attrs={'class': 'form-control input-md', 'placeholder': 'Coordinator Name'}),
+#         'programName': forms.TextInput(
+#             attrs={'class': 'form-control input-md', 'placeholder': 'Program Name'}),
+#     })
+#
+# BudgetFormset = modelformset_factory(
+#     Budget,
+#     fields=['externalExaminer', 'supervisor', 'staff', 'peon', 'tax'],
+#     extra=1,
+#     min_num=1,
+#     max_num=1,
+#     widgets={
+#         'externalExaminer': forms.TextInput(
+#             attrs={'class': 'form-control input-md', 'placeholder': 'Amount', 'type': 'number'}),
+#         'supervisor': forms.TextInput(
+#             attrs={'class': 'form-control input-md', 'placeholder': 'Amount', 'type': 'number'}),
+#         'staff': forms.TextInput(
+#             attrs={'class': 'form-control input-md', 'placeholder': 'Amount', 'type': 'number'}),
+#         'peon': forms.TextInput(
+#             attrs={'class': 'form-control input-md', 'placeholder': 'Amount', 'type': 'number'}),
+#         'tax': forms.TextInput(
+#             attrs={'class': 'form-control input-md', 'placeholder': 'Tax %', 'type': 'number'}),
+#     })
 
-AdministratorForm = modelformset_factory(
-
-    Admin,
-    fields=['coordinatorName', 'programName'],
-    extra=1,
-    min_num=1,
-    max_num=1,
-    widgets={
-        'coordinatorName': forms.TextInput(
-            attrs={'class': 'form-control input-md', 'placeholder': 'Coordinator Name'}),
-        'programName': forms.TextInput(
-            attrs={'class': 'form-control input-md', 'placeholder': 'Program Name'}),
-    })
-
-BudgetFormset = modelformset_factory(
-    Budget,
-    fields=['externalExaminer', 'supervisor', 'staff', 'peon', 'tax'],
-    extra=1,
-    min_num=1,
-    max_num=1,
-    widgets={
-        'externalExaminer': forms.TextInput(
-            attrs={'class': 'form-control input-md', 'placeholder': 'Amount', 'type': 'number'}),
-        'supervisor': forms.TextInput(
-            attrs={'class': 'form-control input-md', 'placeholder': 'Amount', 'type': 'number'}),
-        'staff': forms.TextInput(
-            attrs={'class': 'form-control input-md', 'placeholder': 'Amount', 'type': 'number'}),
-        'peon': forms.TextInput(
-            attrs={'class': 'form-control input-md', 'placeholder': 'Amount', 'type': 'number'}),
-        'tax': forms.TextInput(
-            attrs={'class': 'form-control input-md', 'placeholder': 'Tax %', 'type': 'number'}),
-    })
-
-SupervisorForm = modelformset_factory(
-    Supervisor,
-    fields=['name', 'remove'],
-    extra=1,
-    # form=FormsetStudentForm,
-    widgets={
-        'name': forms.TextInput(
-            attrs={'class': 'form-control input-md', 'placeholder': 'Name'}),
-    })
+# SupervisorForm = modelformset_factory(
+#     Supervisor,
+#     fields=['name', 'remove'],
+#     extra=1,
+#     # form=FormsetStudentForm,
+#     widgets={
+#         'name': forms.TextInput(
+#             attrs={'class': 'form-control input-md', 'placeholder': 'Name'}),
+#     })
 
 
 class NoticeForm(forms.ModelForm):
@@ -134,11 +136,11 @@ class MidTermThesisCommittee(forms.Form):
     CurrentDate = forms.CharField(widget=forms.TextInput(
         attrs={'class': 'form-control input-md', 'placeholder': '14th Mangsir, 2075', 'required': 'True'}))
 
-    Chairman = forms.ModelChoiceField(queryset=Supervisor.objects.all(), widget=forms.Select(
+    Chairman = forms.ModelChoiceField(queryset=Teacher.objects.all(), widget=forms.Select(
         attrs={'class': 'form-control input-md'}))
-    Member = forms.ModelChoiceField(queryset=Supervisor.objects.all(), widget=forms.Select(
+    Member = forms.ModelChoiceField(queryset=Teacher.objects.all(), widget=forms.Select(
         attrs={'class': 'form-control input-md'}))
-    MemberSecretary = forms.ModelChoiceField(queryset=Supervisor.objects.all(), widget=forms.Select(
+    MemberSecretary = forms.ModelChoiceField(queryset=Teacher.objects.all(), widget=forms.Select(
         attrs={'class': 'form-control input-md'}))
 
 

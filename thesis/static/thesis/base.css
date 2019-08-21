@@ -1,6 +1,6 @@
-body, html {
-    height: 100%;
-}
+/*body, html {*/
+/*    height: 100%;*/
+/*}*/
 
 nav.sidebar, .main {
     -webkit-transition: margin 200ms ease-out;

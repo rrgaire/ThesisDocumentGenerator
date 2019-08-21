@@ -5,15 +5,15 @@
 {% endblock %}
 
 {% block body %}
-    <a href="{% url 'finalNotice' %}" class="push_button blue">
+    <a href="{% url 'thesis:finalNotice' %}" class="push_button blue">
         Create Final Thesis Defense Notice
     </a>
 
-    <a href="{% url 'final_thesis_defense_list' %}" class="push_button blue">
+    <a href="{% url 'thesis:final_thesis_defense_list' %}" class="push_button blue">
         Prepare Final Thesis Defense List
     </a>
 
-     <a href="{% url 'results' %}" class="push_button blue">
+     <a href="{% url 'thesis:results' %}" class="push_button blue">
         Final Evaluation Letter
     </a>
 {% endblock %}
