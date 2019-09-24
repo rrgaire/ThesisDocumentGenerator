@@ -10,7 +10,7 @@ openpyxl==2.5.3
 Pillow==5.2.0
 psycopg2==2.7.5
 pytz==2018.4
-PyYAML==3.13
+PyYAML==5.1
 six==1.11.0
 sqlparse==0.2.4
 tablib==0.12.1
